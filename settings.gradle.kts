@@ -47,6 +47,8 @@ dependencyResolutionManagement {
 }
 
 include(":auth")
+include(":sample")
+include(":sample-android")
 
 if(useLocalDesignSystem){
     includeBuild("../stockapp-designsystem"){
