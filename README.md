@@ -1,22 +1,33 @@
 # stockapp-auth
 
-Módulo KMP (Kotlin Multiplatform) + Compose Multiplatform do [StockApp](https://github.com/dgbarreto/stockapp-app) — app de acompanhamento de investimentos (projeto de estudo).
+Kotlin Multiplatform (KMP) + Compose Multiplatform module of [StockApp](https://github.com/dgbarreto/stockapp-app) — an investment tracking app (learning project).
 
-Domain + data (cliente do [`stockapp-backend`](https://github.com/dgbarreto/stockapp-backend), endpoints `/auth`) e telas Compose de login/cadastro.
+Domain + data (client for [`stockapp-backend`](https://github.com/dgbarreto/stockapp-backend), `/auth` endpoints) and Compose login/sign-up screens.
 
-## Estrutura
+## Screens
 
-- `auth/` — único módulo do repo, alvo Android (via `com.android.kotlin.multiplatform.library`) + iOS (framework estático `Auth`), código comum em `auth/src/commonMain`.
+![Login and sign-up screens](docs/screenshots/auth-screens.svg)
+
+## Structure
+
+- `auth/` — the only module in this repo, targeting Android (via `com.android.kotlin.multiplatform.library`) + iOS (static framework `Auth`), shared code in `auth/src/commonMain`.
+- `sample/` + `sample-android/` — dev-only sample apps (Android + Desktop) used to validate the module in isolation.
+
+## What's in it
+
+- **Domain**: `AuthRepository` (`isLoggedIn: Flow<Boolean>`, `login`, `register`, `logout`).
+- **Data**: `AuthApiClient` (Ktor), `TokenStorage` (JWT persisted across sessions via `multiplatform-settings`), `AuthRepositoryImpl`.
+- **Presentation**: `LoginScreen`/`RegisterScreen` + `LoginViewModel`/`RegisterViewModel`, built with `stockapp-designsystem` components (`StockAppTextField`, `StockAppPrimaryButton`, `StockAppErrorBanner`).
 
 ## Status
 
-**Fase 3 — Autenticação** (ver roadmap em `docs/roadmap.md` no repo de planejamento): scaffold criado via [KMP Wizard](https://kmp.jetbrains.com/), ainda sem cliente HTTP nem telas implementadas.
+Fully implemented and validated end-to-end against the backend (register → login → logout). Published to GitHub Packages, branch-protected. Consumed by `stockapp-app`, which builds a single shared `HttpClient` (Ktor `Auth`/`bearer` plugin reading from `TokenStorage`) so every other module gets the JWT attached automatically without depending on `auth` directly.
 
 ## Stack
 
-- Kotlin 2.4.0 · Compose Multiplatform 1.11.1 · AGP 9.0.1
+- Kotlin 2.4.0 · Compose Multiplatform 1.11.1 · AGP 9.0.1 · Ktor Client · multiplatform-settings
 
-## Rodando
+## Running
 
 ```
 ./gradlew :auth:build
@@ -26,4 +37,4 @@ Domain + data (cliente do [`stockapp-backend`](https://github.com/dgbarreto/stoc
 
 ---
 
-_Progresso mantido manualmente conforme o projeto avança._
+_Progress kept up to date manually as the project moves forward._
