@@ -5,9 +5,11 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.parsing.ParseException
+import kotlinx.serialization.json.Json
 
 class AuthApiClient(
     private val httpClient: HttpClient,
@@ -26,6 +28,9 @@ class AuthApiClient(
         }.body()
 }
 
-suspend fun parseErrorMessage(exception: ClientRequestException): String =
-    runCatching { exception.response.body<ErrorResponseDto>().message }
-        .getOrDefault("Unable to complete the operation")
+suspend fun parseErrorMessage(exception: ClientRequestException): String {
+    val bodyText = runCatching { exception.response.bodyAsText() }.getOrNull()
+    return bodyText
+        ?.let { runCatching { Json{ ignoreUnknownKeys = true }.decodeFromString<ErrorResponseDto>(it).message }.getOrNull() }
+        ?: "Unable to complete the operation"
+}
