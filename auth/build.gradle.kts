@@ -90,6 +90,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.multiplatform.settings)
             implementation(libs.multiplatform.settings.noarg)
+            implementation(libs.ktor.client.auth)
 
             implementation("com.danilobarreto.stockapp:designsystem:0.1.3")
         }

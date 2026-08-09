@@ -41,8 +41,8 @@ fun RegisterScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    LaunchedEffect(uiState){
-        if(uiState is RegisterUiState.Success) onRegisterSuccess()
+    LaunchedEffect(Unit){
+        viewModel.reset()
     }
 
     Column(
@@ -95,7 +95,7 @@ fun RegisterScreen(
 
         StockAppPrimaryButton(
             text = "Criar conta",
-            onClick = { viewModel.register(name, email, password) },
+            onClick = { viewModel.register(name, email, password, onSuccess = onRegisterSuccess) },
             loading = uiState is RegisterUiState.Loading,
             enabled = name.isNotBlank() && email.isNotBlank() && password.isNotBlank(),
         )

@@ -3,13 +3,14 @@ package com.danilobarreto.stockapp.auth.data
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.plugin
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.http.parsing.ParseException
 import kotlinx.serialization.json.Json
+import io.ktor.client.plugins.auth.clearAuthTokens
 
 class AuthApiClient(
     private val httpClient: HttpClient,
@@ -26,6 +27,10 @@ class AuthApiClient(
             contentType(ContentType.Application.Json)
             setBody(dto)
         }.body()
+
+    fun invalidateCachedToken() {
+        httpClient.clearAuthTokens()
+    }
 }
 
 suspend fun parseErrorMessage(exception: ClientRequestException): String {

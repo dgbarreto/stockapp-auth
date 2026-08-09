@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 sealed interface RegisterUiState {
     data object Idle: RegisterUiState
     data object Loading: RegisterUiState
-    data object Success: RegisterUiState
     data class Error(val message: String): RegisterUiState
 }
 
@@ -22,14 +21,18 @@ class RegisterViewModel(
     private val _uiState = MutableStateFlow<RegisterUiState>(RegisterUiState.Idle)
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
-    fun register(name: String, email: String, password: String){
+    fun reset(){
+        _uiState.value = RegisterUiState.Idle
+    }
+
+    fun register(name: String, email: String, password: String, onSuccess: () -> Unit){
         if (name.isBlank() || email.isBlank() || password.isBlank()) return
 
         viewModelScope.launch {
             _uiState.value = RegisterUiState.Loading
-            _uiState.value = repository.register(name, email, password).fold(
-                onSuccess = { RegisterUiState.Success },
-                onFailure = { RegisterUiState.Error(it.message ?: "Error creating user") }
+            repository.register(name, email, password).fold(
+                onSuccess = { onSuccess() },
+                onFailure = { _uiState.value = RegisterUiState.Error(it.message ?: "Error creating user") }
             )
         }
     }
