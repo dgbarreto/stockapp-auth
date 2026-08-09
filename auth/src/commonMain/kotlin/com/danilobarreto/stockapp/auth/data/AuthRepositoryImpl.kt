@@ -33,6 +33,7 @@ class AuthRepositoryImpl(
 
     override suspend fun logout() {
         tokenStorage.clear()
+        apiClient.invalidateCachedToken()
         _isLoggedIn.value = false
     }
 

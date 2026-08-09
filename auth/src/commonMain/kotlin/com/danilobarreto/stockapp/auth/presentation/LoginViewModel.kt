@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 sealed interface LoginUiState{
     data object Idle: LoginUiState
     data object Loading: LoginUiState
-    data object Success: LoginUiState
     data class Error(val message: String): LoginUiState
 }
 
@@ -23,14 +22,18 @@ class LoginViewModel(
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    fun login(email: String, password: String){
+    fun reset(){
+        _uiState.value = LoginUiState.Idle
+    }
+
+    fun login(email: String, password: String, onSuccess: () -> Unit){
         if(email.isBlank() || password.isBlank()) return
 
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
-            _uiState.value = repository.login(email, password).fold(
-                onSuccess = { LoginUiState.Success },
-                onFailure = { LoginUiState.Error(it.message ?: "Login error") }
+            repository.login(email, password).fold(
+                onSuccess = { onSuccess() },
+                onFailure = { _uiState.value = LoginUiState.Error(it.message ?: "Login error") }
             )
         }
     }

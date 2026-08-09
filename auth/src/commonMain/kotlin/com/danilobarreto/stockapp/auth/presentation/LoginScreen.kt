@@ -40,8 +40,8 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    LaunchedEffect(uiState) {
-        if (uiState is LoginUiState.Success) onLoginSuccess()
+    LaunchedEffect(Unit) {
+        viewModel.reset()
     }
 
     Column(
@@ -83,7 +83,7 @@ fun LoginScreen(
 
         StockAppPrimaryButton(
             text = "Entrar",
-            onClick = { viewModel.login(email, password) },
+            onClick = { viewModel.login(email, password, onSuccess = onLoginSuccess) },
             loading = uiState is LoginUiState.Loading,
             enabled = email.isNotBlank() && password.isNotBlank(),
         )
