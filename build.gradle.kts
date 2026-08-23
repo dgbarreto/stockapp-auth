@@ -9,6 +9,12 @@ plugins {
     alias(libs.plugins.sonarqube)
 }
 
+val localProperties = java.util.Properties().apply {
+    val f = file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+val useLocalDesignSystem = localProperties.getProperty("useLocalDesignSystem", "false").toBoolean()
+
 sonar {
     properties {
         property("sonar.projectKey", "dgbarreto_stockapp-auth")
@@ -29,7 +35,15 @@ project(":sample-android") {
 }
 
 allprojects {
-    dependencyLocking {
-        lockAllConfigurations()
+    // Gradle's dependency locking is incompatible with composite-build substitution
+    // (gradle/gradle#4749, #28856): resolving a locked native (klib) configuration
+    // while `useLocalDesignSystem` substitutes designsystem via includeBuild() throws
+    // UnsupportedOperationException in DefaultDependencyLockingProvider. Locking a
+    // pinned artifact version is meaningless anyway when depending on the local,
+    // unpublished designsystem build, so skip it in that mode.
+    if (!useLocalDesignSystem) {
+        dependencyLocking {
+            lockAllConfigurations()
+        }
     }
 }
