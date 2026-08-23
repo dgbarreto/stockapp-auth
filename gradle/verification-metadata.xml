@@ -9,6 +9,7 @@
          <trust group="org.junit" name="junit-bom" reason="AGP's transitive graph resolves this via an unpinned range; the exact version drifts across builds"/>
          <trust file=".*-sources\.jar" regex="true" reason="IDE sync (Android Studio's KMP model builder) resolves sources jars for every dependency across every target platform to support 'jump to source' — non-executable, checksumming each one for every transitive dep is impractical"/>
          <trust file=".*-src\.zip" regex="true" reason="Gradle distribution sources zip, resolved by Android Studio for jump-to-source into the Gradle API; non-executable, version drifts with the Gradle wrapper"/>
+         <trust file=".*-javadoc\.jar" regex="true" reason="IDE sync (Android Studio's KMP model builder) resolves javadoc jars for dependencies to support in-IDE documentation lookup — non-executable, same class as sources jars"/>
       </trusted-artifacts>
    </configuration>
    <components>
