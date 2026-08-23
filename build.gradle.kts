@@ -41,7 +41,12 @@ allprojects {
     // UnsupportedOperationException in DefaultDependencyLockingProvider. Locking a
     // pinned artifact version is meaningless anyway when depending on the local,
     // unpublished designsystem build, so skip it in that mode.
-    if (!useLocalDesignSystem) {
+    //
+    // :sample and :sample-android are also skipped: Compose Multiplatform resolves
+    // a host-OS-specific desktop artifact (e.g. desktop-jvm-macos-arm64 vs
+    // desktop-jvm-linux-x64) for the same configuration, so a lock file committed
+    // from one machine's OS/arch fails verification on every other one.
+    if (!useLocalDesignSystem && name != "sample" && name != "sample-android") {
         dependencyLocking {
             lockAllConfigurations()
         }
