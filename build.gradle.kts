@@ -50,5 +50,17 @@ allprojects {
         dependencyLocking {
             lockAllConfigurations()
         }
+
+        // Compose Hot Reload's "Dev" configurations (desktopDevCompileClasspath,
+        // composeHotReloadDevDesktopDevRuntimeClasspath, ...) resolve a host-OS-specific
+        // desktop-jvm artifact (linux-x64 vs macos-arm64 vs ...), so a lock file
+        // committed from one machine's OS/arch never matches on another — same class
+        // of problem as :sample above, but this one hits :auth itself since Hot
+        // Reload's tooling is wired into every module, not just the demo app.
+        configurations.configureEach {
+            if (name.contains("Dev")) {
+                resolutionStrategy.deactivateDependencyLocking()
+            }
+        }
     }
 }
