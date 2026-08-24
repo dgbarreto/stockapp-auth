@@ -31,6 +31,24 @@ class AuthApiClient(
     fun invalidateCachedToken() {
         httpClient.clearAuthTokens()
     }
+
+    suspend fun forgotPassword(dto: ForgotPasswordRequestDto): MessageResponseDto =
+        httpClient.post("$baseUrl/auth/forgot-password"){
+            contentType(ContentType.Application.Json)
+            setBody(dto)
+        }.body()
+
+    suspend fun validateResetCode(dto: ValidateResetCodeRequestDto): ValidateResetCodeResponseDto =
+        httpClient.post("$baseUrl/auth/validate-reset-code"){
+            contentType(ContentType.Application.Json)
+            setBody(dto)
+        }.body()
+
+    suspend fun resetPassword(dto: ResetPasswordRequestDto): MessageResponseDto =
+        httpClient.post("$baseUrl/auth/reset-password"){
+            contentType(ContentType.Application.Json)
+            setBody(dto)
+        }.body()
 }
 
 suspend fun parseErrorMessage(exception: ClientRequestException): String {
