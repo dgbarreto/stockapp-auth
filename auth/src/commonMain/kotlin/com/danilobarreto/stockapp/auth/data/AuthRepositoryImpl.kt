@@ -43,4 +43,27 @@ class AuthRepositoryImpl(
         } else {
             throwable
         }
+
+    override suspend fun requestPasswordReset(email: String): Result<Unit> =
+        runCatching {
+            apiClient.forgotPassword(ForgotPasswordRequestDto(email))
+            Unit
+        }.recoverCatching { throwable ->
+            throw mapAuthError(throwable)
+        }
+
+    override suspend fun validateResetCode(email: String, code: String): Result<String> =
+        runCatching {
+            apiClient.validateResetCode(ValidateResetCodeRequestDto(email, code)).resetToken
+        }.recoverCatching { throwable ->
+            throw mapAuthError(throwable)
+        }
+
+    override suspend fun resetPassword(resetToken: String, newPassword: String): Result<Unit> =
+        runCatching {
+            apiClient.resetPassword(ResetPasswordRequestDto(resetToken, newPassword))
+            Unit
+        }.recoverCatching { throwable ->
+            throw mapAuthError(throwable)
+        }
 }

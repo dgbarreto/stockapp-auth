@@ -26,3 +26,30 @@ data class ErrorResponseDto(
     val message: String,
     val error: String? = null
 )
+
+@Serializable
+data class ForgotPasswordRequestDto(
+    val email: String
+)
+
+@Serializable
+data class ValidateResetCodeRequestDto(
+    val email: String,
+    val code: String
+)
+
+@Serializable
+data class ValidateResetCodeResponseDto(
+    val resetToken: String
+)
+
+@Serializable
+data class ResetPasswordRequestDto(
+    val resetToken: String,
+    val newPassword: String
+)
+
+@Serializable
+data class MessageResponseDto(
+    val message: String
+)
