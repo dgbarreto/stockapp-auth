@@ -3,11 +3,16 @@ package com.danilobarreto.stockapp.auth.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -27,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.danilobarreto.stockapp.designsystem.components.StockAppErrorBanner
 import com.danilobarreto.stockapp.designsystem.components.StockAppPrimaryButton
 import com.danilobarreto.stockapp.designsystem.components.StockAppTextField
+import com.danilobarreto.stockapp.designsystem.icons.StockAppIcons
 import com.danilobarreto.stockapp.designsystem.theme.StockAppColors
 import com.danilobarreto.stockapp.designsystem.theme.StockAppTypography
 
@@ -34,7 +41,8 @@ import com.danilobarreto.stockapp.designsystem.theme.StockAppTypography
 fun RegisterScreen(
     viewModel: RegisterViewModel,
     onRegisterSuccess: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onBack: () -> Unit,
 ){
     val uiState by viewModel.uiState.collectAsState()
     var name by remember { mutableStateOf("") }
@@ -53,14 +61,29 @@ fun RegisterScreen(
             .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(StockAppColors.surface2, shape = CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = StockAppIcons.ArrowLeft,
+                    contentDescription = "Voltar",
+                    tint = StockAppColors.textPrimary,
+                )
+            }
+        }
+
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                "Criar conta",
+                "Bora criar sua conta",
                 style = StockAppTypography.titleLarge,
                 color = StockAppColors.textPrimary
             )
             Text(
-                "Leva menos de um minuto",
+                "Leva menos de um minuto. Sem taxa, sem letra miúda.",
                 style = StockAppTypography.bodyMedium,
                 color = StockAppColors.textSecondary,
             )
@@ -93,8 +116,14 @@ fun RegisterScreen(
             StockAppErrorBanner((uiState as RegisterUiState.Error).message)
         }
 
+        Text(
+            "Ao continuar, você concorda com nossos Termos de Uso e nossa Política de Privacidade.",
+            style = StockAppTypography.labelSmall,
+            color = StockAppColors.textSecondary,
+        )
+
         StockAppPrimaryButton(
-            text = "Criar conta",
+            text = "Continuar",
             onClick = { viewModel.register(name, email, password, onSuccess = onRegisterSuccess) },
             loading = uiState is RegisterUiState.Loading,
             enabled = name.isNotBlank() && email.isNotBlank() && password.isNotBlank(),
