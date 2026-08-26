@@ -57,6 +57,7 @@ fun SampleApp() {
                 viewModel = registerViewModel,
                 onRegisterSuccess = { screen = SampleScreen.Login },
                 onNavigateToLogin = { screen = SampleScreen.Login },
+                onBack = { screen = SampleScreen.Login },
             )
 
             SampleScreen.ForgotPassword -> ForgotPasswordScreen(
