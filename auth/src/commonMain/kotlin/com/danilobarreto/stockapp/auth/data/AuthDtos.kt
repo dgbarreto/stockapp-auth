@@ -53,3 +53,10 @@ data class ResetPasswordRequestDto(
 data class MessageResponseDto(
     val message: String
 )
+
+@Serializable
+data class UserProfileDto(
+    val name: String,
+    val email: String,
+    val createdAt: String
+)

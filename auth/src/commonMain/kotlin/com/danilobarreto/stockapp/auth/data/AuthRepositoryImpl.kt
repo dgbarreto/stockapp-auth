@@ -5,6 +5,7 @@ import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.danilobarreto.stockapp.auth.domain.UserProfile
 
 class AuthRepositoryImpl(
     private val apiClient: AuthApiClient,
@@ -63,6 +64,14 @@ class AuthRepositoryImpl(
         runCatching {
             apiClient.resetPassword(ResetPasswordRequestDto(resetToken, newPassword))
             Unit
+        }.recoverCatching { throwable ->
+            throw mapAuthError(throwable)
+        }
+
+    override suspend fun getCurrentUser(): Result<UserProfile> =
+        runCatching {
+            val dto = apiClient.me()
+            UserProfile(name = dto.name, email = dto.email, memberSinceIso = dto.createdAt)
         }.recoverCatching { throwable ->
             throw mapAuthError(throwable)
         }

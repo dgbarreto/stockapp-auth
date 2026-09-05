@@ -11,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
 import io.ktor.client.plugins.auth.clearAuthTokens
+import io.ktor.client.request.get
 
 class AuthApiClient(
     private val httpClient: HttpClient,
@@ -49,6 +50,9 @@ class AuthApiClient(
             contentType(ContentType.Application.Json)
             setBody(dto)
         }.body()
+
+    suspend fun me(): UserProfileDto =
+        httpClient.get("$baseUrl/auth/me").body()
 }
 
 suspend fun parseErrorMessage(exception: ClientRequestException): String {
