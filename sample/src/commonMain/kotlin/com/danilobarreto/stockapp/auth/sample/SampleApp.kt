@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import com.danilobarreto.stockapp.auth.data.AuthApiClient
 import com.danilobarreto.stockapp.auth.data.AuthRepositoryImpl
 import com.danilobarreto.stockapp.auth.data.TokenStorage
@@ -13,22 +14,31 @@ import com.danilobarreto.stockapp.auth.presentation.LoginScreen
 import com.danilobarreto.stockapp.auth.presentation.LoginViewModel
 import com.danilobarreto.stockapp.auth.presentation.NewPasswordScreen
 import com.danilobarreto.stockapp.auth.presentation.PasswordResetViewModel
+import com.danilobarreto.stockapp.auth.presentation.ProfileScreen
+import com.danilobarreto.stockapp.auth.presentation.ProfileViewModel
 import com.danilobarreto.stockapp.auth.presentation.RegisterScreen
 import com.danilobarreto.stockapp.auth.presentation.RegisterViewModel
 import com.danilobarreto.stockapp.auth.presentation.ResetCodeScreen
 import com.danilobarreto.stockapp.designsystem.theme.StockAppTheme
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 private enum class SampleScreen {
-    Login, Register, ForgotPassword, ResetCode, NewPassword
+    Login, Register, ForgotPassword, ResetCode, NewPassword, Profile
 }
 
 @Composable
 fun SampleApp() {
     var screen by remember { mutableStateOf(SampleScreen.Login) }
+    val coroutineScope = rememberCoroutineScope()
+
+    val tokenStorage = remember { TokenStorage() }
 
     val repository = remember {
         val httpClient = HttpClient {
@@ -36,19 +46,27 @@ fun SampleApp() {
             install(ContentNegotiation) {
                 json(Json { ignoreUnknownKeys = true })
             }
+            install(Auth) {
+                bearer {
+                    loadTokens {
+                        tokenStorage.read()?.let { BearerTokens(it, refreshToken = "") }
+                    }
+                }
+            }
         }
         val apiClient = AuthApiClient(httpClient, baseUrl = sampleBaseUrl())
-        AuthRepositoryImpl(apiClient, TokenStorage())
+        AuthRepositoryImpl(apiClient, tokenStorage)
     }
     val loginViewModel = remember { LoginViewModel(repository) }
     val registerViewModel = remember { RegisterViewModel(repository) }
     val passwordResetViewModel = remember { PasswordResetViewModel(repository) }
+    val profileViewModel = remember { ProfileViewModel(repository) }
 
     StockAppTheme {
         when (screen) {
             SampleScreen.Login -> LoginScreen(
                 viewModel = loginViewModel,
-                onLoginSuccess = { /* sample isolado: sem próxima tela ainda */ },
+                onLoginSuccess = { screen = SampleScreen.Profile },
                 onNavigateToRegister = { screen = SampleScreen.Register },
                 onForgotPassword = { screen = SampleScreen.ForgotPassword },
             )
@@ -76,6 +94,16 @@ fun SampleApp() {
                 viewModel = passwordResetViewModel,
                 onBack = { screen = SampleScreen.ResetCode },
                 onPasswordReset = { screen = SampleScreen.Login },
+            )
+
+            SampleScreen.Profile -> ProfileScreen(
+                viewModel = profileViewModel,
+                onLogout = {
+                    coroutineScope.launch {
+                        repository.logout()
+                        screen = SampleScreen.Login
+                    }
+                },
             )
         }
     }
