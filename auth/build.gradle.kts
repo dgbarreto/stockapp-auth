@@ -84,7 +84,7 @@ kotlin {
             implementation(libs.multiplatform.settings.noarg)
             implementation(libs.ktor.client.auth)
 
-            implementation("com.danilobarreto.stockapp:designsystem:0.3.0")
+            implementation("com.danilobarreto.stockapp:designsystem:0.4.3")
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
