@@ -123,7 +123,7 @@ fun ProfileScreen(
                         ProfileStatCard(
                             modifier = Modifier.weight(1f),
                             label = "Ordens lançadas",
-                            value = "—",
+                            value = profile.ordersCount.toString(),
                         )
                     }
 

@@ -71,7 +71,7 @@ class AuthRepositoryImpl(
     override suspend fun getCurrentUser(): Result<UserProfile> =
         runCatching {
             val dto = apiClient.me()
-            UserProfile(name = dto.name, email = dto.email, memberSinceIso = dto.createdAt)
+            UserProfile(name = dto.name, email = dto.email, memberSinceIso = dto.createdAt, ordersCount = dto.ordersCount,)
         }.recoverCatching { throwable ->
             throw mapAuthError(throwable)
         }
