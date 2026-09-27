@@ -58,5 +58,6 @@ data class MessageResponseDto(
 data class UserProfileDto(
     val name: String,
     val email: String,
-    val createdAt: String
+    val createdAt: String,
+    val ordersCount: Int
 )
