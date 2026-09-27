@@ -104,6 +104,11 @@ fun SampleApp() {
                         screen = SampleScreen.Login
                     }
                 },
+                // Sem NavHost de verdade aqui — o sample só mostra que o clique dispara o
+                // callback certo (println), a navegação real é coisa do stockapp-app.
+                onMinhasOrdens = { println("SAMPLE_AUTH → Minhas ordens") },
+                onImportacoes = { println("SAMPLE_AUTH → Importações da B3") },
+                onValuation = { println("SAMPLE_AUTH → Preço-teto e valuation") },
             )
         }
     }
