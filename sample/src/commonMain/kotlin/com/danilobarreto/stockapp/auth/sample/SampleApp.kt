@@ -1,6 +1,8 @@
 package com.danilobarreto.stockapp.auth.sample
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -9,6 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import com.danilobarreto.stockapp.auth.data.AuthApiClient
 import com.danilobarreto.stockapp.auth.data.AuthRepositoryImpl
 import com.danilobarreto.stockapp.auth.data.TokenStorage
+import com.danilobarreto.stockapp.auth.data.createAuthenticatedHttpClient
 import com.danilobarreto.stockapp.auth.presentation.ForgotPasswordScreen
 import com.danilobarreto.stockapp.auth.presentation.LoginScreen
 import com.danilobarreto.stockapp.auth.presentation.LoginViewModel
@@ -20,14 +23,9 @@ import com.danilobarreto.stockapp.auth.presentation.RegisterScreen
 import com.danilobarreto.stockapp.auth.presentation.RegisterViewModel
 import com.danilobarreto.stockapp.auth.presentation.ResetCodeScreen
 import com.danilobarreto.stockapp.designsystem.theme.StockAppTheme
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.auth.providers.BearerTokens
-import io.ktor.client.plugins.auth.providers.bearer
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.client.plugins.HttpSend
+import io.ktor.client.plugins.plugin
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 
 private enum class SampleScreen {
     Login, Register, ForgotPassword, ResetCode, NewPassword, Profile
@@ -35,26 +33,32 @@ private enum class SampleScreen {
 
 @Composable
 fun SampleApp() {
-    var screen by remember { mutableStateOf(SampleScreen.Login) }
+    val tokenStorage = remember { TokenStorage() }
+    val hasSession by tokenStorage.hasSession.collectAsState()
+
+    // Já logado (sessão salva) → abre direto no Perfil, pra testar o refresh ao reabrir o app.
+    var screen by remember {
+        mutableStateOf(if (tokenStorage.hasSession.value) SampleScreen.Profile else SampleScreen.Login)
+    }
     val coroutineScope = rememberCoroutineScope()
 
-    val tokenStorage = remember { TokenStorage() }
+    // Sessão encerrada por fora (refresh falhou dentro do SessionManager) → volta pro Login.
+    LaunchedEffect(hasSession) {
+        if (!hasSession && screen == SampleScreen.Profile) {
+            println("SAMPLE_AUTH → sessão encerrada, voltando pro Login")
+            screen = SampleScreen.Login
+        }
+    }
 
     val repository = remember {
-        val httpClient = HttpClient {
-            expectSuccess = true
-            install(ContentNegotiation) {
-                json(Json { ignoreUnknownKeys = true })
-            }
-            install(Auth) {
-                bearer {
-                    loadTokens {
-                        tokenStorage.read()?.let { BearerTokens(it, refreshToken = "") }
-                    }
-                }
-            }
+        val baseUrl = sampleBaseUrl()
+        val httpClient = createAuthenticatedHttpClient(baseUrl, tokenStorage)
+        httpClient.plugin(HttpSend).intercept { request ->
+            val call = execute(request)
+            println("SAMPLE_HTTP → ${request.method.value} ${request.url.buildString()} → ${call.response.status.value}")
+            call
         }
-        val apiClient = AuthApiClient(httpClient, baseUrl = sampleBaseUrl())
+        val apiClient = AuthApiClient(httpClient, baseUrl = baseUrl)
         AuthRepositoryImpl(apiClient, tokenStorage)
     }
     val loginViewModel = remember { LoginViewModel(repository) }
